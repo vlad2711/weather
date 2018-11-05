@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">weather</string>
+    <string name="a">a</string>
+    <string name="textview">TextView</string>
+    <string name="degrees">%1$sº</string>
+    <string name="humidity">%1$s%%</string>
+    <string name="wind">%1$skm/h</string>
+    <string name="precip">%1$smm</string>
+    <string name="pressure">%1$s mBar</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="drawerbutton">drawerButton</string>
+    <string name="google_map_key">AIzaSyC2N0prn0cRBJcg-iZhJb9k4dGsQhNgDdI</string>
+</resources>

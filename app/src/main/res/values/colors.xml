@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <color name="colorPrimary">#3F51B5</color>
+  <color name="colorPrimaryDark">#303F9F</color>
+  <color name="colorAccent">#FF4081</color>
+  <color name="black">#242424</color>
+  <color name="white">#ffffff</color>
+  <color name="outerspace">#424242</color>
+  <color name="darkturquoise">#00bbd3</color>
+  <color name="cerulean">#008ba3</color>
+  <color name="PrimaryLight">#64c1ff</color>
+  <color name="richelectricblue">#0091ea</color>
+  <color name="mikadoyellow">#ffc107</color>
+  <color name="frenchblue">#0064b7</color>
+  <color name="YellowLight">#fff350</color>
+  <color name="YellowDark">#c79100</color>
+
+</resources>
+
