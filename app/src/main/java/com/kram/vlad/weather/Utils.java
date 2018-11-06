@@ -36,6 +36,7 @@ public class Utils {
             sQontra = Typeface.createFromAsset(context.getAssets(), "fonts/Qontra.otf");
             isQontra = true;
         }
+
         if (sWeatherIcon == null && Objects.equals(fontName, "icons")) {
             sWeatherIcon = Typeface.createFromAsset(context.getAssets(), "fonts/artill_clean_icons.otf");
             isIcons = true;
