@@ -1,6 +1,8 @@
 package com.kram.vlad.weather.geolocation;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -42,7 +44,7 @@ public class GeoLocationProvider implements GoogleApiClient.ConnectionCallbacks,
 
     private GoogleApiClient googleApiClient;
 
-    public  GeoLocationProvider(MainActivity context) {
+    public GeoLocationProvider(MainActivity context) {
         if (checkPlayServices(context)) {
             googleApiClient = createApiClient(context);
 
@@ -79,7 +81,7 @@ public class GeoLocationProvider implements GoogleApiClient.ConnectionCallbacks,
         return googleApiClient;
     }
 
-    private void createLocationRequest(final MainActivity mainActivity) {
+    private void createLocationRequest(final GeoLocationCallback geoLocationCallback) {
 
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
@@ -92,14 +94,20 @@ public class GeoLocationProvider implements GoogleApiClient.ConnectionCallbacks,
         PendingResult<LocationSettingsResult> result =
                 LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
 
-        mainActivity.geolocation(48.510473, 32.251812);
+        //mainActivity.geolocation(48.510473, 32.251812);
+
         result.setResultCallback(locationSettingsResult -> {
             final Status status = locationSettingsResult.getStatus();
+            try {
+                status.startResolutionForResult((AppCompatActivity)geoLocationCallback, LocationSettingsStatusCodes.RESOLUTION_REQUIRED);
+            } catch (IntentSender.SendIntentException e) {
+                e.printStackTrace();
+            }
             switch (status.getStatusCode()) {
                 case LocationSettingsStatusCodes.SUCCESS:
-                    Location location = getLocation(mainActivity);
+                    Location location = getLocation((Context) geoLocationCallback);
                     Log.d(TAG, location.getLatitude() + "," + location.getLongitude());
-                    mainActivity.geolocation(location.getLatitude(), location.getLongitude());
+                    geoLocationCallback.geolocation(location.getLatitude(), location.getLongitude());
                     break;
                 case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                     Log.d(TAG, "resolution");
@@ -111,17 +119,20 @@ public class GeoLocationProvider implements GoogleApiClient.ConnectionCallbacks,
 
     }
 
-    private Location getLocation(MainActivity context) {
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
+    private Location getLocation(Context context) {
+        //if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        //    ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        // }
 
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-        }
+        // if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        //    ActivityCompat.requestPermissions(context, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+        //}
 
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null;
+
+        }
         return LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-
     }
 
     private boolean checkPlayServices(AppCompatActivity context) {

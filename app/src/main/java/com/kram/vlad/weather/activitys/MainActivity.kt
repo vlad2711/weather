@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
         toolbarInit()
         initUserInterface()
-        geolocation(48.510473, 32.251812)
+        //geolocation(48.510473, 32.251812)
 
         initGeolocation()
 
@@ -158,7 +158,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
             val gcd = Geocoder(this, Locale.getDefault())
             val addresses = gcd.getFromLocation(latitude, longitude, 1)
             val cityName = addresses[0].locality
-            //String cityName = mGeoLocationProvider.getAddress(latitude, longitude, this);
+           // String cityName = mGeoLocationProvider.getAddress(latitude, longitude, this);
 
             Preferences.CITYS.add(City(latitude.toString(),
                     longitude.toString(),
