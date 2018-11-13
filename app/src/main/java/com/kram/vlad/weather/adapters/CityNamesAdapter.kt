@@ -64,6 +64,7 @@ class CityNamesAdapter(mainActivity: MainActivity, private val mContext: Context
                 Preferences.CITYS.removeAt(position)
                 mUpdateItemCallback.updateItemCallback()
             }
+
             itemView.itemLayout !!.setOnClickListener { v ->
 
                 //  holder.marker.setImageResource(R.drawable.marker_red);
