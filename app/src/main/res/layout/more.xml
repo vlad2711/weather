@@ -4,10 +4,9 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
-    android:background="@drawable/rectangle">
+              android:layout_height="match_parent">
 
-    <RelativeLayout
+   <!-- <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
@@ -44,7 +43,6 @@
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/mask"
                 android:layout_marginTop="9dp">
 
                 <ImageView
@@ -81,7 +79,7 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/wind"
+            android:background="@drawable/windy"
             android:layout_marginTop="320dp"
             android:layout_marginLeft="70dp">
 
@@ -160,6 +158,6 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_toEndOf="@+id/imLayout"/>
-    </RelativeLayout>
+    </RelativeLayout>!-->
 
 </RelativeLayout>

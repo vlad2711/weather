@@ -2,7 +2,7 @@ package com.kram.vlad.weather.recycler_view_models;
 
 /**
  * Created by vlad on 14.08.17.
- * Model for recyclerView
+ * WeatherModel for recyclerView
  */
 
 public class City {

@@ -1,13 +1,12 @@
 package com.kram.vlad.weather.api
 
 
-import com.kram.vlad.weather.models.Model
+import com.kram.vlad.weather.models.WeatherModel
 
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
-import com.kram.vlad.weather.Constants.WEATHER_BASE_URL
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
@@ -18,7 +17,7 @@ import com.kram.vlad.weather.Constants
 
 /**
  * Created by 1 on 03.01.2017.
- * Get interface for retrofit. Return Model class.
+ * Get interface for retrofit. Return WeatherModel class.
  * Used for request to weather api
  */
 
@@ -35,7 +34,7 @@ interface IWeatherProvider {
                    @Query("show_comments") comments: String,
                    @Query("showlocaltime") localtime: String,
                    @Query("lang") lang: String,
-                   @Query("tp") tp: String): Call<Model>
+                   @Query("tp") tp: String): Call<WeatherModel>
 
     companion object {
         fun create(): IWeatherProvider {

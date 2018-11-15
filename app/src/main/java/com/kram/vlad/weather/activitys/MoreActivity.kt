@@ -43,7 +43,7 @@ class MoreActivity : AppCompatActivity() {
         val calendar = GregorianCalendar.getInstance()
         calendar.set(Calendar.HOUR, 0)
 
-        wind!!.text = String.format(res.getString(R.string.wind), hourly.windspeedKmph)
+        /*wind!!.text = String.format(res.getString(R.string.wind), hourly.windspeedKmph)
         precip!!.text = String.format(res.getString(R.string.precip), hourly.precipMM)
         pressure!!.text = String.format(res.getString(R.string.pressure), hourly.pressure)
         temperatureMore!!.text = String.format(res.getString(R.string.degrees), hourly.tempC)
@@ -57,7 +57,7 @@ class MoreActivity : AppCompatActivity() {
                 pressure,
                 temperatureMore,
                 humidity,
-                value)
+                value)*/
     }
 
     companion object {

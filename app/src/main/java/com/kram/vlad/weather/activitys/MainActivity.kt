@@ -18,7 +18,6 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import com.google.gson.reflect.TypeToken
-import com.kram.vlad.weather.App
 import com.kram.vlad.weather.Constants
 import com.kram.vlad.weather.R
 import com.kram.vlad.weather.Utils
@@ -31,7 +30,7 @@ import com.kram.vlad.weather.callbacks.UpdateItemCallback
 import com.kram.vlad.weather.geolocation.GeoLocationCallback
 import com.kram.vlad.weather.geolocation.GeoLocationProvider
 import com.kram.vlad.weather.models.Hourly
-import com.kram.vlad.weather.models.Model
+import com.kram.vlad.weather.models.WeatherModel
 import com.kram.vlad.weather.models.Weather
 import com.kram.vlad.weather.recycler_view_models.City
 import com.kram.vlad.weather.settings.Preferences
@@ -40,6 +39,7 @@ import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
 import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.gson.Gson
+import com.kram.vlad.weather.adapters.TimelineAdapter
 
 import java.io.IOException
 import java.util.ArrayList
@@ -81,7 +81,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                     Manifest.permission.ACCESS_FINE_LOCATION)
         }
 
-        getOrientation()
 
         toolbarInit()
         initUserInterface()
@@ -103,43 +102,21 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         when (v.id) {
             R.id.cityChoose -> drawerLayoutToggle(Gravity.LEFT, Gravity.RIGHT)
             R.id.navigationRight -> drawerLayoutToggle(Gravity.RIGHT, Gravity.LEFT)
-
-            R.id.weatherHourlyIcon1-> startMoreActivity(1)
-            R.id.weatherHourlyIcon2-> startMoreActivity(2)
-            R.id.weatherHourlyIcon3-> startMoreActivity(3)
-            R.id.weatherHourlyIcon4-> startMoreActivity(4)
-            R.id.weatherHourlyIcon5-> startMoreActivity(5)
-            R.id.weatherHourlyIcon6-> startMoreActivity(6)
         }
     }
 
-    fun handleResponse(model: Model?) {
-
-        if (model != null) {
+    fun handleResponse(weatherModel: WeatherModel?) {
+        if (weatherModel != null) {
             runOnUiThread {
-                Utils.sModel = model
-                initializeRecyclerViewDate(model.data.weather)
-                weatherLayout!!.visibility = View.VISIBLE
-
-                val currentCondition = model.data.current_condition[0]
-
-                weatherImage!!.setImageBitmap(Utils.WEATHERIMAGES[currentCondition.weatherCode])
-                temperature!!.text = String.format(resources.getString(R.string.degrees), currentCondition.temp_C)
-
-                val hourly = model.data.weather[0].hourly
-                setWeatherForecast(hourly)
-
-                weatherLayout!!.visibility = View.VISIBLE
+                Utils.sWeatherModel = weatherModel
+                initializeRecyclerViewDate(weatherModel.data.weather)
+                setWeatherForecast(weatherModel.data.weather[0])
                 progressBar!!.visibility = View.INVISIBLE
+
+                weather_icon.setImageResource(Utils.WEATHERIMAGES[weatherModel.data.current_condition[0].weatherCode]!!)
+                weather_state.text = weatherModel.data.current_condition[0].lang_ru[0].value
+                temperature.text = String.format(resources.getString(R.string.degrees), weatherModel.data.current_condition[0].temp_C)
             }
-
-
-        } else {
-            Log.d(TAG, "null")
-
-            //  Toast toast = new Toast(getApplicationContext());
-            // toast.setText("Failed to download data.Try later");
-            //  toast.show();
         }
     }
 
@@ -158,8 +135,8 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
             val gcd = Geocoder(this, Locale.getDefault())
             val addresses = gcd.getFromLocation(latitude, longitude, 1)
             val cityName = addresses[0].locality
-           // String cityName = mGeoLocationProvider.getAddress(latitude, longitude, this);
 
+            city_name.text = cityName
             Preferences.CITYS.add(City(latitude.toString(),
                     longitude.toString(),
                     cityName))
@@ -196,9 +173,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     }
 
     override fun forecastDateCallback(weather: Array<Weather>, position: Int) {
-        weatherImage!!.setImageBitmap(Utils.WEATHERIMAGES[weather[position].hourly[0].weatherCode])
-        temperature!!.setText(String.format(resources.getString(R.string.degrees), weather[position].hourly[0].tempC))
-        setWeatherForecast(weather[position].hourly)
+        setWeatherForecast(weather[position])
         initializeRecyclerViewDate(weather)
 
     }
@@ -234,26 +209,16 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         }
     }
 
-    private fun setWeatherForecast(hourly: Array<Hourly>) {
-        weatherHourlyIcon1.text = Utils.WEATHERICONS[hourly[0].weatherCode]
-        weatherHourlyIcon2.text = Utils.WEATHERICONS[hourly[1].weatherCode]
-        weatherHourlyIcon3.text = Utils.WEATHERICONS[hourly[2].weatherCode]
-        weatherHourlyIcon4.text = Utils.WEATHERICONS[hourly[3].weatherCode]
-        weatherHourlyIcon5.text = Utils.WEATHERICONS[hourly[4].weatherCode]
-        weatherHourlyIcon6.text = Utils.WEATHERICONS[hourly[5].weatherCode]
+    private fun setWeatherForecast(weather: Weather) {
+        timeline_view.layoutManager = LinearLayoutManager(this)
+        timeline_view.adapter = TimelineAdapter(weather)
     }
 
     private fun initUserInterface() {
         setTypefacesAndIcons()
         initializeRecyclerView()
         initializeToolbarButton()
-        setOnclickListeners(weatherHourlyIcon1,
-                weatherHourlyIcon6,
-                weatherHourlyIcon2,
-                weatherHourlyIcon3,
-                weatherHourlyIcon4,
-                weatherHourlyIcon5,
-                weatherImage)
+
         initializeAutoCompleteFragment()
         getCitysFromSharedPreferences()
     }
@@ -269,52 +234,22 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     }
 
     private fun getOrientation() {
-        if (Utils().getScreenSize(this) < Preferences.PORTRAITSCREENSIZE) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        requestedOrientation = if (Utils().getScreenSize(this) < Preferences.PORTRAITSCREENSIZE) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
     }
 
     private fun setTypefacesAndIcons() {
 
-        val utils = Utils()
-
-        utils.setTypeface(applicationContext,
-                "icons",
-                weatherHourlyIcon1,
-                weatherHourlyIcon6,
-                weatherHourlyIcon2,
-                weatherHourlyIcon3,
-                weatherHourlyIcon4,
-                weatherHourlyIcon5)
-
-        utils.setTypeface(applicationContext,
-                "qontra",
-                temperature)
-
-        utils.setWeatherImage(applicationContext)
+        Utils.setWeatherImage()
         Utils.getIcons()
     }
 
-    private fun createCallFromGeoPosition(weatherProvider: IWeatherProvider, latitude: String, longitude: String): Call<Model> {
+    private fun createCallFromGeoPosition(weatherProvider: IWeatherProvider, latitude: String, longitude: String): Call<WeatherModel> {
         Log.d(TAG, "call")
-
-        val mapJson = HashMap<String, String>()
-        mapJson["key"] = Constants.WEATHER_API_KEY
-        mapJson["q"] = "$latitude,$longitude"
-        mapJson["num_of_days"] = "14"
-        mapJson["date"] = "today"
-        mapJson["format"] = "json"
-        mapJson["show_comments"] = "yes"
-        mapJson["showlocaltime"] = "yes"
-        mapJson["lang"] = "ru"
-        mapJson["tp"] = "1"
-
-        weatherLayout!!.visibility = View.INVISIBLE
         progressBar!!.visibility = View.VISIBLE
-
-
 
         return weatherProvider.getWeather(Constants.WEATHER_API_KEY,
                 "$latitude,$longitude",
@@ -324,7 +259,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                 "yes",
                 "yes",
                 "ru",
-                "1")
+                "3")
     }
 
     private fun initializeToolbarButton() {
@@ -372,11 +307,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         editor.apply()
     }
 
-    private fun setOnclickListeners(vararg views: View) {
-        for (view in views) {
-            view.setOnClickListener(this)
-        }
-    }
 
     private fun drawerLayoutToggle(gravityOpen: Int, gravityClose: Int) {
 
@@ -392,27 +322,16 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         }
     }
 
-    private fun getWeather(call: Call<Model>) {
-        call.enqueue(object : Callback<Model> {
+    private fun getWeather(call: Call<WeatherModel>) {
+        call.enqueue(object : Callback<WeatherModel> {
 
-            override fun onResponse(call: Call<Model>, response: Response<Model>) {
+            override fun onResponse(call: Call<WeatherModel>, response: Response<WeatherModel>) {
                 handleResponse(response.body())
             }
 
-            override fun onFailure(call: Call<Model>, t: Throwable) {
+            override fun onFailure(call: Call<WeatherModel>, t: Throwable) {
                 t.printStackTrace()
             }
         })
     }
-
-    private fun startMoreActivity(id: Int) {
-        if (Utils.sModel != null) {
-            val intent = Intent(this, MoreActivity::class.java)
-            intent.putExtra("Hourly", Gson().toJson(Utils.sModel.data.weather[sRecyclerViewDateCurrentPosition].hourly[id]))
-            startActivity(intent)
-
-        }
-    }
-
-
 }

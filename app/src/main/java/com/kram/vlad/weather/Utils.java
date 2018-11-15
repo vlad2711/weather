@@ -8,8 +8,9 @@ import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.widget.TextView;
-import com.kram.vlad.weather.models.Model;
+import com.kram.vlad.weather.models.WeatherModel;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -20,9 +21,9 @@ import java.util.Objects;
 
 public class Utils {
 
-    public static HashMap<String, Bitmap> WEATHERIMAGES = new HashMap<>();
+    public static HashMap<String, Integer> WEATHERIMAGES = new HashMap<>();
     public static HashMap<String, String> WEATHERICONS = new HashMap<>();
-    public static Model sModel;
+    public static WeatherModel sWeatherModel;
 
     private static Typeface sQontra;
     private static Typeface sWeatherIcon;
@@ -51,33 +52,42 @@ public class Utils {
         }
     }
 
-    public void setWeatherImage(Context context) {
-        Resources res = context.getResources();
-        WEATHERIMAGES.put("113", BitmapFactory.decodeResource(res, R.drawable.sunny));
-        WEATHERIMAGES.put("116", BitmapFactory.decodeResource(res, R.drawable.party_cloudy));
-        WEATHERIMAGES.put("119", BitmapFactory.decodeResource(res, R.drawable.cloudy));
-        WEATHERIMAGES.put("122", BitmapFactory.decodeResource(res, R.drawable.overcast));
-        WEATHERIMAGES.put("143", BitmapFactory.decodeResource(res, R.drawable.mist));
-        WEATHERIMAGES.put("176", BitmapFactory.decodeResource(res, R.drawable.patchy_rain));
-        WEATHERIMAGES.put("179", BitmapFactory.decodeResource(res, R.drawable.snow));
-        WEATHERIMAGES.put("183", BitmapFactory.decodeResource(res, R.drawable.sleet));
-        WEATHERIMAGES.put("185", BitmapFactory.decodeResource(res, R.drawable.freezy_drizle));
-        WEATHERIMAGES.put("200", BitmapFactory.decodeResource(res, R.drawable.lightining));
-        WEATHERIMAGES.put("227", BitmapFactory.decodeResource(res, R.drawable.blowing_snow));
-        WEATHERIMAGES.put("230", BitmapFactory.decodeResource(res, R.drawable.blizzard));
-        WEATHERIMAGES.put("248", BitmapFactory.decodeResource(res, R.drawable.fog));
-        WEATHERIMAGES.put("260", BitmapFactory.decodeResource(res, R.drawable.freezing_fog));
-        WEATHERIMAGES.put("263", BitmapFactory.decodeResource(res, R.drawable.patchy_rain));
-        WEATHERIMAGES.put("266", BitmapFactory.decodeResource(res, R.drawable.patchy_rain));
-        WEATHERIMAGES.put("281", BitmapFactory.decodeResource(res, R.drawable.freezy_drizle));
-        WEATHERIMAGES.put("284", BitmapFactory.decodeResource(res, R.drawable.heavy_freazing_drezzle));
-        WEATHERIMAGES.put("293", BitmapFactory.decodeResource(res, R.drawable.rain));
-        WEATHERIMAGES.put("296", BitmapFactory.decodeResource(res, R.drawable.rain));
-        WEATHERIMAGES.put("299", BitmapFactory.decodeResource(res, R.drawable.moderate_rain));
-        WEATHERIMAGES.put("302", BitmapFactory.decodeResource(res, R.drawable.moderate_rain));
-        WEATHERIMAGES.put("305", BitmapFactory.decodeResource(res, R.drawable.heavy_rain));
-        WEATHERIMAGES.put("308", BitmapFactory.decodeResource(res, R.drawable.heavy_rain));
-        WEATHERIMAGES.put("311", BitmapFactory.decodeResource(res, R.drawable.freezy_drizle));
+    public static void setWeatherImage() {
+        WEATHERIMAGES.put("113", R.drawable.sunny);
+        WEATHERIMAGES.put("116", R.drawable.party_cloudy);
+        WEATHERIMAGES.put("119", R.drawable.overcast);
+        WEATHERIMAGES.put("122", R.drawable.overcast);
+        WEATHERIMAGES.put("143", R.drawable.mist);
+        WEATHERIMAGES.put("176", R.drawable.rain);
+        WEATHERIMAGES.put("179", R.drawable.snow);
+        WEATHERIMAGES.put("183", R.drawable.sleet);
+        WEATHERIMAGES.put("185", R.drawable.sleet);
+        WEATHERIMAGES.put("200", R.drawable.lightinning);
+        WEATHERIMAGES.put("227", R.drawable.blowing_snow);
+        WEATHERIMAGES.put("230", R.drawable.blizzard);
+        WEATHERIMAGES.put("248", R.drawable.fog);
+        WEATHERIMAGES.put("260", R.drawable.fog);
+        WEATHERIMAGES.put("263", R.drawable.rain);
+        WEATHERIMAGES.put("266", R.drawable.rain);
+        WEATHERIMAGES.put("281", R.drawable.rain);
+        WEATHERIMAGES.put("284", R.drawable.rain);
+        WEATHERIMAGES.put("293", R.drawable.rain);
+        WEATHERIMAGES.put("296", R.drawable.rain);
+        WEATHERIMAGES.put("299", R.drawable.moderate_rain);
+        WEATHERIMAGES.put("302", R.drawable.moderate_rain);
+        WEATHERIMAGES.put("305", R.drawable.heavy_rain);
+        WEATHERIMAGES.put("308", R.drawable.heavy_rain);
+        WEATHERIMAGES.put("311", R.drawable.rain);
+        WEATHERIMAGES.put("314", R.drawable.moderate_rain);
+        WEATHERIMAGES.put("317", R.drawable.sleet);
+        WEATHERIMAGES.put("320", R.drawable.sleet);
+        WEATHERIMAGES.put("323", R.drawable.snow);
+        WEATHERIMAGES.put("326", R.drawable.snow);
+        WEATHERIMAGES.put("329", R.drawable.snow);
+        WEATHERIMAGES.put("332", R.drawable.snow);
+        WEATHERIMAGES.put("335", R.drawable.snow);
+        WEATHERIMAGES.put("338", R.drawable.snow);
+        WEATHERIMAGES.put("350", R.drawable.snow);
 
     }
 
@@ -107,6 +117,13 @@ public class Utils {
         WEATHERICONS.put("305", "K");
         WEATHERICONS.put("308", "K");
         WEATHERICONS.put("311", "O");
+    }
+
+    public static int getTime(int hmm){
+        int time = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + hmm/100;
+        if(time > 24) time -= 24;
+
+        return time;
     }
 
     public double getScreenSize(AppCompatActivity activity) {
