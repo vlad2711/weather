@@ -22,14 +22,11 @@ import java.util.Objects;
 public class Utils {
 
     public static HashMap<String, Integer> WEATHERIMAGES = new HashMap<>();
-    public static HashMap<String, String> WEATHERICONS = new HashMap<>();
-    public static WeatherModel sWeatherModel;
-
-    private static Typeface sQontra;
-    private static Typeface sWeatherIcon;
+   // public static HashMap<String, String> WEATHERICONS = new HashMap<>();
+    public static HashMap<String, WeatherModel> sWeatherModels = new HashMap<>();
 
 
-    public void setTypeface(Context context, String fontName, TextView... textViews) {
+    /*public void setTypeface(Context context, String fontName, TextView... textViews) {
 
         boolean isQontra = false;
         boolean isIcons = false;
@@ -50,7 +47,7 @@ public class Utils {
             if (isIcons)
                 view.setTypeface(sWeatherIcon);
         }
-    }
+    }*/
 
     public static void setWeatherImage() {
         WEATHERIMAGES.put("113", R.drawable.sunny);
@@ -91,7 +88,7 @@ public class Utils {
 
     }
 
-    public static void getIcons() {
+    /*public static void getIcons() {
         WEATHERICONS.put("113", "1");
         WEATHERICONS.put("116", "A");
         WEATHERICONS.put("119", "a");
@@ -117,7 +114,7 @@ public class Utils {
         WEATHERICONS.put("305", "K");
         WEATHERICONS.put("308", "K");
         WEATHERICONS.put("311", "O");
-    }
+    }*/
 
     public static int getTime(int hmm){
         int time = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + hmm/100;
@@ -125,21 +122,4 @@ public class Utils {
 
         return time;
     }
-
-    public double getScreenSize(AppCompatActivity activity) {
-        DisplayMetrics dm = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-        int width = dm.widthPixels;
-        int height = dm.heightPixels;
-
-        double wi = (double) width / (double) dm.xdpi;
-        double hi = (double) height / (double) dm.ydpi;
-
-        double x = Math.pow(wi, 2);
-        double y = Math.pow(hi, 2);
-
-        return Math.sqrt(x + y);
-    }
-
 }

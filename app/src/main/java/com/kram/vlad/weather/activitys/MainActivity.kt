@@ -3,33 +3,28 @@ package com.kram.vlad.weather.activitys
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
+import android.support.design.widget.TabLayout
 import android.support.v4.app.ActivityCompat
-import android.support.v4.view.GravityCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
-import android.view.Gravity
 import android.view.View
 import com.google.gson.reflect.TypeToken
 import com.kram.vlad.weather.Constants
 import com.kram.vlad.weather.R
 import com.kram.vlad.weather.Utils
-import com.kram.vlad.weather.adapters.CityNamesAdapter
-import com.kram.vlad.weather.adapters.DateAdapter
 import com.kram.vlad.weather.api.IWeatherProvider
 import com.kram.vlad.weather.callbacks.CityChooseCallback
 import com.kram.vlad.weather.callbacks.ForecastDateCallback
 import com.kram.vlad.weather.callbacks.UpdateItemCallback
 import com.kram.vlad.weather.geolocation.GeoLocationCallback
 import com.kram.vlad.weather.geolocation.GeoLocationProvider
-import com.kram.vlad.weather.models.Hourly
 import com.kram.vlad.weather.models.WeatherModel
 import com.kram.vlad.weather.models.Weather
 import com.kram.vlad.weather.recycler_view_models.City
@@ -40,10 +35,10 @@ import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
 import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.gson.Gson
 import com.kram.vlad.weather.adapters.TimelineAdapter
+import com.kram.vlad.weather.adapters.WeatherForecastAdapter
 
 import java.io.IOException
 import java.util.ArrayList
-import java.util.HashMap
 import java.util.Locale
 
 import retrofit2.Call
@@ -56,14 +51,11 @@ import kotlinx.android.synthetic.main.activity_main.*
  * MainActivity of app
  */
 
-class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback, View.OnClickListener, ForecastDateCallback {
+class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback, ForecastDateCallback, TabLayout.OnTabSelectedListener {
+
 
     companion object {
-
         val TAG = MainActivity::class.java.simpleName
-
-        var sRecyclerViewDateCurrentPosition = 0
-        var sRecyclerViewCityCurrentPosition = 0
     }
 
     var mWeatherProvider: IWeatherProvider? = IWeatherProvider.create()
@@ -98,24 +90,13 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         }
     }
 
-    override fun onClick(v: View) {
-        when (v.id) {
-            R.id.cityChoose -> drawerLayoutToggle(Gravity.LEFT, Gravity.RIGHT)
-            R.id.navigationRight -> drawerLayoutToggle(Gravity.RIGHT, Gravity.LEFT)
-        }
-    }
-
-    fun handleResponse(weatherModel: WeatherModel?) {
+    fun handleResponse(weatherModel: WeatherModel?, city: String) {
         if (weatherModel != null) {
             runOnUiThread {
-                Utils.sWeatherModel = weatherModel
-                initializeRecyclerViewDate(weatherModel.data.weather)
+                Utils.sWeatherModels[city] = weatherModel
                 setWeatherForecast(weatherModel.data.weather[0])
                 progressBar!!.visibility = View.INVISIBLE
-
-                weather_icon.setImageResource(Utils.WEATHERIMAGES[weatherModel.data.current_condition[0].weatherCode]!!)
-                weather_state.text = weatherModel.data.current_condition[0].lang_ru[0].value
-                temperature.text = String.format(resources.getString(R.string.degrees), weatherModel.data.current_condition[0].temp_C)
+                pager.adapter!!.notifyDataSetChanged()
             }
         }
     }
@@ -128,15 +109,14 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
     override fun geolocation(latitude: Double, longitude: Double) {
 
-        getWeather(createCallFromGeoPosition(mWeatherProvider!!, latitude.toString(), longitude.toString()))
 
         try {
 
             val gcd = Geocoder(this, Locale.getDefault())
             val addresses = gcd.getFromLocation(latitude, longitude, 1)
             val cityName = addresses[0].locality
+            getWeather(createCallFromGeoPosition(mWeatherProvider!!, latitude.toString(), longitude.toString()), cityName)
 
-            city_name.text = cityName
             Preferences.CITYS.add(City(latitude.toString(),
                     longitude.toString(),
                     cityName))
@@ -150,12 +130,10 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     }
 
     override fun updateItemCallback() {
-        initializeRecyclerView()
+        initializeCities()
     }
 
     override fun cityChooseCallback(city: City, position: Int) {
-
-        sRecyclerViewCityCurrentPosition = position
 
         if (mAutocompleteFragment != null) {
             try {
@@ -168,14 +146,18 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
         }
 
-        getWeather(createCallFromGeoPosition(mWeatherProvider!!, city.latitude.toString(), city.longitude.toString()))
-
+        getWeather(createCallFromGeoPosition(mWeatherProvider!!, city.latitude.toString(), city.longitude.toString()), city.name)
     }
 
     override fun forecastDateCallback(weather: Array<Weather>, position: Int) {
         setWeatherForecast(weather[position])
-        initializeRecyclerViewDate(weather)
+    }
 
+    override fun onTabReselected(p0: TabLayout.Tab?) {}
+    override fun onTabUnselected(p0: TabLayout.Tab?) {}
+
+    override fun onTabSelected(p0: TabLayout.Tab?) {
+        cityChooseCallback(Preferences.CITYS[p0!!.position], p0.position)
     }
 
     override fun onPlaceSelected(place: Place) {
@@ -184,8 +166,9 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                 place.latLng.latitude.toString(),
                 place.latLng.longitude.toString(),
                 place.name as String))
-        getWeather(createCallFromGeoPosition(mWeatherProvider!!, place.latLng.latitude.toString(), place.latLng.longitude.toString()))
+        getWeather(createCallFromGeoPosition(mWeatherProvider!!, place.latLng.latitude.toString(), place.latLng.longitude.toString()), place.name as String)
 
+        initializeCities()
 
         this.updateItemCallback()
 
@@ -196,31 +179,18 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         Log.i(TAG, "An error occurred: $status")
     }
 
-    override fun onBackPressed() {
-
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            if (drawerLayout.isDrawerOpen(GravityCompat.END)) {
-                drawerLayout.closeDrawer(GravityCompat.END)
-            } else {
-                super.onBackPressed()
-            }
-        }
-    }
-
     private fun setWeatherForecast(weather: Weather) {
-        timeline_view.layoutManager = LinearLayoutManager(this)
-        timeline_view.adapter = TimelineAdapter(weather)
+
     }
 
     private fun initUserInterface() {
         setTypefacesAndIcons()
-        initializeRecyclerView()
-        initializeToolbarButton()
-
         initializeAutoCompleteFragment()
         getCitysFromSharedPreferences()
+        getOrientation()
+        initializeCities()
+
+        pager.adapter = WeatherForecastAdapter(supportFragmentManager)
     }
 
     private fun initGeolocation() {
@@ -234,17 +204,11 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     }
 
     private fun getOrientation() {
-        requestedOrientation = if (Utils().getScreenSize(this) < Preferences.PORTRAITSCREENSIZE) {
-            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        } else {
-            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        }
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     private fun setTypefacesAndIcons() {
-
         Utils.setWeatherImage()
-        Utils.getIcons()
     }
 
     private fun createCallFromGeoPosition(weatherProvider: IWeatherProvider, latitude: String, longitude: String): Call<WeatherModel> {
@@ -262,25 +226,29 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                 "3")
     }
 
-    private fun initializeToolbarButton() {
-        toolbar!!.findViewById<View>(R.id.cityChoose).setOnClickListener(this)
-        toolbar!!.findViewById<View>(R.id.navigationRight).setOnClickListener(this)
-    }
+    private fun initializeCities() {
 
-    private fun initializeRecyclerView() {
-        drawerRecyclerView.adapter = CityNamesAdapter(this, applicationContext)
-        drawerRecyclerView.layoutManager = LinearLayoutManager(this)
+        Log.d(TAG, Preferences.CITYS.size.toString())
+        if(cities.tabCount > 0){
+            cities.removeAllTabs()
+            cities.removeOnTabSelectedListener(this)
+        }
 
-    }
+        for (i in 0 until Preferences.CITYS.size) {
+            val tab = cities.newTab()
+            tab.text = Preferences.CITYS[i].name
+            cities.addTab(tab)
+            //cities.setTabTextColors(R.color.colorAccent, R.color.tabSelectedColor)
+        }
 
-    private fun initializeRecyclerViewDate(weather: Array<Weather>) {
-        drawerRecyclerViewDate.adapter = DateAdapter(weather, this, applicationContext)
-        drawerRecyclerViewDate.layoutManager = LinearLayoutManager(this)
+        if(cities.tabCount > 0) {
+//            cities.getTabAt(position)!!.select()
+            cities.addOnTabSelectedListener(this)
+        }
     }
 
     private fun initializeAutoCompleteFragment() {
         mAutocompleteFragment = fragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
-
         mAutocompleteFragment!!.setOnPlaceSelectedListener(this)
     }
 
@@ -290,13 +258,16 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         if (mSharedPreferences!!.contains("Citys")) {
             val gson = Gson()
             val json = mSharedPreferences!!.getString("Citys", "")
-            Preferences.CITYS = gson.fromJson(json, object : TypeToken<ArrayList<City>>() {
-
-            }.type)
+            Preferences.CITYS = gson.fromJson(json,ArrayList<City>()::class.java)
+            for (i in 0 until Preferences.CITYS.size) {
+                getWeather(createCallFromGeoPosition(mWeatherProvider!!, Preferences.CITYS[i].latitude,Preferences.CITYS[i].longitude), Preferences.CITYS[i].name)
+            }
             Log.d(TAG, Preferences.CITYS.toString())
         } else {
             Preferences.CITYS = ArrayList()
         }
+
+        initializeCities()
     }
 
     private fun createSharedPreferences() {
@@ -307,26 +278,11 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         editor.apply()
     }
 
-
-    private fun drawerLayoutToggle(gravityOpen: Int, gravityClose: Int) {
-
-        if (drawerLayout.isDrawerOpen(gravityClose)) {
-            drawerLayout.closeDrawer(gravityClose)
-            drawerLayout.openDrawer(gravityOpen)
-        } else {
-            if (drawerLayout.isDrawerOpen(gravityOpen)) {
-                drawerLayout.closeDrawer(gravityOpen)
-            } else {
-                drawerLayout.openDrawer(gravityOpen)
-            }
-        }
-    }
-
-    private fun getWeather(call: Call<WeatherModel>) {
+    private fun getWeather(call: Call<WeatherModel>, city: String) {
         call.enqueue(object : Callback<WeatherModel> {
 
             override fun onResponse(call: Call<WeatherModel>, response: Response<WeatherModel>) {
-                handleResponse(response.body())
+                handleResponse(response.body(), city)
             }
 
             override fun onFailure(call: Call<WeatherModel>, t: Throwable) {
