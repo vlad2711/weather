@@ -1,18 +1,9 @@
 package com.kram.vlad.weather;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
-import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
-import android.widget.TextView;
 import com.kram.vlad.weather.models.WeatherModel;
 
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Objects;
 
 /**
  * Created by vlad on 10.08.17.
@@ -85,6 +76,20 @@ public class Utils {
         WEATHERIMAGES.put("335", R.drawable.snow);
         WEATHERIMAGES.put("338", R.drawable.snow);
         WEATHERIMAGES.put("350", R.drawable.snow);
+        WEATHERIMAGES.put("353", R.drawable.rain);
+        WEATHERIMAGES.put("356", R.drawable.heavy_rain);
+        WEATHERIMAGES.put("359", R.drawable.rain);
+        WEATHERIMAGES.put("362", R.drawable.sleet);
+        WEATHERIMAGES.put("365", R.drawable.sleet);
+        WEATHERIMAGES.put("368", R.drawable.snow);
+        WEATHERIMAGES.put("371", R.drawable.snow);
+        WEATHERIMAGES.put("374", R.drawable.snow);
+        WEATHERIMAGES.put("377", R.drawable.snow);
+        WEATHERIMAGES.put("386", R.drawable.lightinning);
+        WEATHERIMAGES.put("389", R.drawable.lightinning);
+        WEATHERIMAGES.put("392", R.drawable.snow);
+        WEATHERIMAGES.put("395", R.drawable.snow);
+
 
     }
 

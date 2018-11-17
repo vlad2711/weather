@@ -1,6 +1,7 @@
 package com.kram.vlad.weather.adapters
 
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ class TimelineAdapter(val weather: Weather): RecyclerView.Adapter<TimelineAdapte
     class Holder(view: View): RecyclerView.ViewHolder(view){
         private val TAG = this::class.java.simpleName
         fun bind(hourly: Hourly, size: Int){
+         ///   Log.d(TAG, hourly.weatherCode.toString())
             itemView.weather_icon.setImageResource(Utils.WEATHERIMAGES[hourly.weatherCode]!!)
             itemView.temperature.text = String.format(itemView.resources.getString(R.string.degrees), hourly.tempC)
             itemView.time.text = String.format(itemView.resources.getString(R.string.time), Utils.getTime(hourly.time.toInt()).toString())

@@ -3,14 +3,22 @@ package com.kram.vlad.weather.fragments
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.kram.vlad.weather.Constants
 import com.kram.vlad.weather.R
 import com.kram.vlad.weather.Utils
+import com.kram.vlad.weather.activitys.MainActivity
 import com.kram.vlad.weather.adapters.TimelineAdapter
+import com.kram.vlad.weather.api.IWeatherProvider
+import com.kram.vlad.weather.models.WeatherModel
 import com.kram.vlad.weather.settings.Preferences
 import kotlinx.android.synthetic.main.weather_forecat_fragment.view.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class WeatherForecastFragment: Fragment() {
     private lateinit var cityName: String

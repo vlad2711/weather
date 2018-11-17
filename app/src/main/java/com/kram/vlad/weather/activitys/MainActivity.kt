@@ -36,6 +36,7 @@ import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.gson.Gson
 import com.kram.vlad.weather.adapters.TimelineAdapter
 import com.kram.vlad.weather.adapters.WeatherForecastAdapter
+import io.reactivex.Observable
 
 import java.io.IOException
 import java.util.ArrayList
@@ -45,13 +46,14 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.reflect.Type
 
 
 /**
  * MainActivity of app
  */
 
-class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback, ForecastDateCallback, TabLayout.OnTabSelectedListener {
+class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback, TabLayout.OnTabSelectedListener {
 
 
     companion object {
@@ -84,19 +86,23 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d(TAG, "destroy ${Preferences.CITYS.size}")
         if (Preferences.CITYS.size > 0) {
             Preferences.CITYS.removeAt(0)
-            createSharedPreferences()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        createSharedPreferences()
     }
 
     fun handleResponse(weatherModel: WeatherModel?, city: String) {
         if (weatherModel != null) {
             runOnUiThread {
                 Utils.sWeatherModels[city] = weatherModel
-                setWeatherForecast(weatherModel.data.weather[0])
                 progressBar!!.visibility = View.INVISIBLE
-                pager.adapter!!.notifyDataSetChanged()
+                pager.adapter = WeatherForecastAdapter(supportFragmentManager)
             }
         }
     }
@@ -149,10 +155,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         getWeather(createCallFromGeoPosition(mWeatherProvider!!, city.latitude.toString(), city.longitude.toString()), city.name)
     }
 
-    override fun forecastDateCallback(weather: Array<Weather>, position: Int) {
-        setWeatherForecast(weather[position])
-    }
-
     override fun onTabReselected(p0: TabLayout.Tab?) {}
     override fun onTabUnselected(p0: TabLayout.Tab?) {}
 
@@ -179,10 +181,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         Log.i(TAG, "An error occurred: $status")
     }
 
-    private fun setWeatherForecast(weather: Weather) {
-
-    }
-
     private fun initUserInterface() {
         setTypefacesAndIcons()
         initializeAutoCompleteFragment()
@@ -190,7 +188,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         getOrientation()
         initializeCities()
 
-        pager.adapter = WeatherForecastAdapter(supportFragmentManager)
     }
 
     private fun initGeolocation() {
@@ -255,13 +252,37 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     private fun getCitysFromSharedPreferences() {
         mSharedPreferences = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE)
 
+        Log.d(TAG, mSharedPreferences!!.contains("Citys").toString())
         if (mSharedPreferences!!.contains("Citys")) {
             val gson = Gson()
             val json = mSharedPreferences!!.getString("Citys", "")
-            Preferences.CITYS = gson.fromJson(json,ArrayList<City>()::class.java)
+
+            Log.d(TAG, json)
+            Preferences.CITYS = gson.fromJson(json, object: TypeToken<ArrayList<City>>(){}.type)
+
+            val requests = ArrayList<Observable<WeatherModel>>()
             for (i in 0 until Preferences.CITYS.size) {
-                getWeather(createCallFromGeoPosition(mWeatherProvider!!, Preferences.CITYS[i].latitude,Preferences.CITYS[i].longitude), Preferences.CITYS[i].name)
+                requests.add(mWeatherProvider!!.getWeatherObservable(Constants.WEATHER_API_KEY,
+                        "${Preferences.CITYS[i].latitude},${Preferences.CITYS[i].longitude}",
+                        "14",
+                        "today",
+                        "json",
+                        "yes",
+                        "yes",
+                        "ru",
+                        "3"))
             }
+
+            Observable.zip(requests){
+                for (i in 0 until it.size) {
+                    Utils.sWeatherModels[Preferences.CITYS[i].name] = (it[i] as WeatherModel)
+                }
+            }.subscribe({
+                pager.adapter = WeatherForecastAdapter(supportFragmentManager)
+            }){
+                it.printStackTrace()
+            }
+
             Log.d(TAG, Preferences.CITYS.toString())
         } else {
             Preferences.CITYS = ArrayList()
@@ -280,7 +301,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
     private fun getWeather(call: Call<WeatherModel>, city: String) {
         call.enqueue(object : Callback<WeatherModel> {
-
             override fun onResponse(call: Call<WeatherModel>, response: Response<WeatherModel>) {
                 handleResponse(response.body(), city)
             }

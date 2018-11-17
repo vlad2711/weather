@@ -12,10 +12,11 @@ import com.kram.vlad.weather.R
 import com.kram.vlad.weather.Utils
 import com.kram.vlad.weather.fragments.WeatherForecastFragment
 import com.kram.vlad.weather.settings.Preferences
-import kotlinx.android.synthetic.main.weather_forecat_fragment.view.*
 
 class WeatherForecastAdapter(fragmentManager: FragmentManager): FragmentPagerAdapter(fragmentManager) {
-    override fun getItem(p0: Int) = WeatherForecastFragment.newInstance(Preferences.CITYS[p0].name)
+    override fun getItem(p0: Int): Fragment {
+        return WeatherForecastFragment.newInstance(Preferences.CITYS[p0].name)
+    }
 
     override fun getCount() = Preferences.CITYS.size
 }
