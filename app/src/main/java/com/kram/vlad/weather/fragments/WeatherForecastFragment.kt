@@ -28,10 +28,9 @@ class WeatherForecastFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.weather_forecat_fragment, container, false)
         cityName = arguments!!.getString("city")!!
-        userInterfaceInit(view)
+        if(Utils.sWeatherModels.containsKey(cityName)) userInterfaceInit(view)
         return view
     }
-
 
     private fun userInterfaceInit(view: View){
         view.weather_icon.setImageResource(Utils.WEATHERIMAGES[Utils.sWeatherModels[cityName]!!.data.current_condition[0].weatherCode]!!)

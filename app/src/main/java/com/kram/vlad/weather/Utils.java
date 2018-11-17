@@ -85,7 +85,19 @@ public class Utils {
         WEATHERIMAGES.put("335", R.drawable.snow);
         WEATHERIMAGES.put("338", R.drawable.snow);
         WEATHERIMAGES.put("350", R.drawable.snow);
-
+        WEATHERIMAGES.put("353", R.drawable.rain);
+        WEATHERIMAGES.put("356", R.drawable.heavy_rain);
+        WEATHERIMAGES.put("359", R.drawable.rain);
+        WEATHERIMAGES.put("362", R.drawable.sleet);
+        WEATHERIMAGES.put("365", R.drawable.sleet);
+        WEATHERIMAGES.put("368", R.drawable.snow);
+        WEATHERIMAGES.put("371", R.drawable.snow);
+        WEATHERIMAGES.put("374", R.drawable.snow);
+        WEATHERIMAGES.put("377", R.drawable.snow);
+        WEATHERIMAGES.put("386", R.drawable.lightinning);
+        WEATHERIMAGES.put("389", R.drawable.lightinning);
+        WEATHERIMAGES.put("392", R.drawable.snow);
+        WEATHERIMAGES.put("395", R.drawable.snow);
     }
 
     /*public static void getIcons() {

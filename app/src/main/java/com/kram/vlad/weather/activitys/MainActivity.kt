@@ -36,6 +36,7 @@ import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.gson.Gson
 import com.kram.vlad.weather.adapters.TimelineAdapter
 import com.kram.vlad.weather.adapters.WeatherForecastAdapter
+import io.reactivex.Observable
 
 import java.io.IOException
 import java.util.ArrayList
@@ -51,7 +52,7 @@ import kotlinx.android.synthetic.main.activity_main.*
  * MainActivity of app
  */
 
-class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback, ForecastDateCallback, TabLayout.OnTabSelectedListener {
+class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback, TabLayout.OnTabSelectedListener {
 
 
     companion object {
@@ -82,19 +83,18 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onPause() {
+        super.onPause()
         if (Preferences.CITYS.size > 0) {
-            Preferences.CITYS.removeAt(0)
             createSharedPreferences()
         }
     }
+
 
     fun handleResponse(weatherModel: WeatherModel?, city: String) {
         if (weatherModel != null) {
             runOnUiThread {
                 Utils.sWeatherModels[city] = weatherModel
-                setWeatherForecast(weatherModel.data.weather[0])
                 progressBar!!.visibility = View.INVISIBLE
                 pager.adapter!!.notifyDataSetChanged()
             }
@@ -149,10 +149,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         getWeather(createCallFromGeoPosition(mWeatherProvider!!, city.latitude.toString(), city.longitude.toString()), city.name)
     }
 
-    override fun forecastDateCallback(weather: Array<Weather>, position: Int) {
-        setWeatherForecast(weather[position])
-    }
-
     override fun onTabReselected(p0: TabLayout.Tab?) {}
     override fun onTabUnselected(p0: TabLayout.Tab?) {}
 
@@ -179,9 +175,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         Log.i(TAG, "An error occurred: $status")
     }
 
-    private fun setWeatherForecast(weather: Weather) {
-
-    }
 
     private fun initUserInterface() {
         setTypefacesAndIcons()
@@ -258,9 +251,29 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         if (mSharedPreferences!!.contains("Citys")) {
             val gson = Gson()
             val json = mSharedPreferences!!.getString("Citys", "")
-            Preferences.CITYS = gson.fromJson(json,ArrayList<City>()::class.java)
+            Preferences.CITYS = gson.fromJson(json, object: TypeToken<ArrayList<City>>(){}.type)
+            val requests = ArrayList<Observable<WeatherModel>>()
+
             for (i in 0 until Preferences.CITYS.size) {
-                getWeather(createCallFromGeoPosition(mWeatherProvider!!, Preferences.CITYS[i].latitude,Preferences.CITYS[i].longitude), Preferences.CITYS[i].name)
+                requests.add(mWeatherProvider!!.getWeatherObservable(Constants.WEATHER_API_KEY,
+                        "${Preferences.CITYS[i].latitude},${Preferences.CITYS[i].longitude}",
+                        "14",
+                        "today",
+                        "json",
+                        "yes",
+                        "yes",
+                        "ru",
+                        "3"))
+            }
+
+            Observable.zip(requests){
+                for (i in 0 until it.size) {
+                    Utils.sWeatherModels[Preferences.CITYS[i].name] = (it[i] as WeatherModel)
+                }
+            }.subscribe({
+                pager.adapter!!.notifyDataSetChanged()
+            }){
+                it.printStackTrace()
             }
             Log.d(TAG, Preferences.CITYS.toString())
         } else {
@@ -273,8 +286,11 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     private fun createSharedPreferences() {
         val gson = Gson()
         Log.d(TAG, gson.toJson(Preferences.CITYS))
+
+        val buf = Preferences.CITYS
+        //if(buf.isNotEmpty())buf.removeAt(0)
         val editor = mSharedPreferences!!.edit()
-        editor.putString("Citys", gson.toJson(Preferences.CITYS))
+        editor.putString("Citys", gson.toJson(buf))
         editor.apply()
     }
 
