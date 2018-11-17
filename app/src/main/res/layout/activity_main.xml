@@ -41,7 +41,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:tabBackground="@color/colorPrimary"
-        app:tabIndicatorColor="@color/colorAccent">
+        app:tabIndicatorColor="@color/colorAccent"
+        app:tabMode="scrollable">
     </android.support.design.widget.TabLayout>
 
     <android.support.v7.widget.Toolbar
