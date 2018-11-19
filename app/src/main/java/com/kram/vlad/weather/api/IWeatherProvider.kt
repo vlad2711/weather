@@ -51,7 +51,11 @@ interface IWeatherProvider {
             return Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
+<<<<<<< HEAD
                     //.client(client)
+=======
+                    .client(client)
+>>>>>>> dev
                     .baseUrl(Constants.WEATHER_BASE_URL)
                     .build().create(IWeatherProvider::class.java)
         }

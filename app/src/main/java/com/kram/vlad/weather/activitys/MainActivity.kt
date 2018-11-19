@@ -5,24 +5,24 @@ import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.support.design.widget.TabLayout
 import android.support.v4.app.ActivityCompat
+import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.google.gson.reflect.TypeToken
 import com.kram.vlad.weather.Constants
 import com.kram.vlad.weather.R
 import com.kram.vlad.weather.Utils
 import com.kram.vlad.weather.api.IWeatherProvider
-import com.kram.vlad.weather.callbacks.CityChooseCallback
-import com.kram.vlad.weather.callbacks.ForecastDateCallback
-import com.kram.vlad.weather.callbacks.UpdateItemCallback
 import com.kram.vlad.weather.geolocation.GeoLocationCallback
 import com.kram.vlad.weather.geolocation.GeoLocationProvider
 import com.kram.vlad.weather.models.WeatherModel
@@ -53,7 +53,11 @@ import java.lang.reflect.Type
  * MainActivity of app
  */
 
+<<<<<<< HEAD
 class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback, TabLayout.OnTabSelectedListener {
+=======
+class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener {
+>>>>>>> dev
 
 
     companion object {
@@ -75,9 +79,8 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                     Manifest.permission.ACCESS_FINE_LOCATION)
         }
 
-
-        toolbarInit()
         initUserInterface()
+<<<<<<< HEAD
         //geolocation(48.510473, 32.251812)
 
         initGeolocation()
@@ -90,6 +93,8 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         if (Preferences.CITYS.size > 0) {
             Preferences.CITYS.removeAt(0)
         }
+=======
+>>>>>>> dev
     }
 
     override fun onPause() {
@@ -107,15 +112,23 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
+
     private fun checkPermissions(vararg permissions: String) {
         ActivityCompat.requestPermissions(this, permissions, Constants.PERMISSION_REQUEST_CODE)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == Constants.PERMISSION_REQUEST_CODE){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                initGeolocation()
+            } else{
+                Toast.makeText(this, "Can't use geolocation to find your position :(", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun geolocation(latitude: Double, longitude: Double) {
-
-
         try {
 
             val gcd = Geocoder(this, Locale.getDefault())
@@ -123,18 +136,18 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
             val cityName = addresses[0].locality
             getWeather(createCallFromGeoPosition(mWeatherProvider!!, latitude.toString(), longitude.toString()), cityName)
 
-            Preferences.CITYS.add(City(latitude.toString(),
+            Preferences.CITYS.add(0, City(latitude.toString(),
                     longitude.toString(),
-                    cityName))
-            if (mAutocompleteFragment != null && cityName != null)
-                mAutocompleteFragment!!.setText(cityName)
-
+                    cityName,
+                    "current"))
+            initializeCities()
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
     }
 
+<<<<<<< HEAD
     override fun updateItemCallback() {
         initializeCities()
     }
@@ -161,18 +174,20 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     override fun onTabSelected(p0: TabLayout.Tab?) {
         cityChooseCallback(Preferences.CITYS[p0!!.position], p0.position)
     }
+=======
+>>>>>>> dev
 
     override fun onPlaceSelected(place: Place) {
 
         Preferences.CITYS.add(City(
                 place.latLng.latitude.toString(),
                 place.latLng.longitude.toString(),
-                place.name as String))
+                place.name as String,
+                "added"))
         getWeather(createCallFromGeoPosition(mWeatherProvider!!, place.latLng.latitude.toString(), place.latLng.longitude.toString()), place.name as String)
 
         initializeCities()
 
-        this.updateItemCallback()
 
         Log.i(TAG, "Place: " + place.name)
     }
@@ -181,23 +196,24 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         Log.i(TAG, "An error occurred: $status")
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> dev
     private fun initUserInterface() {
         setTypefacesAndIcons()
         initializeAutoCompleteFragment()
         getCitysFromSharedPreferences()
         getOrientation()
         initializeCities()
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
     }
 
     private fun initGeolocation() {
         mGeoLocationProvider = GeoLocationProvider(this)
-    }
-
-    private fun toolbarInit() {
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayShowTitleEnabled(false)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
     }
 
     private fun getOrientation() {
@@ -228,20 +244,30 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         Log.d(TAG, Preferences.CITYS.size.toString())
         if(cities.tabCount > 0){
             cities.removeAllTabs()
-            cities.removeOnTabSelectedListener(this)
         }
 
         for (i in 0 until Preferences.CITYS.size) {
             val tab = cities.newTab()
             tab.text = Preferences.CITYS[i].name
             cities.addTab(tab)
-            //cities.setTabTextColors(R.color.colorAccent, R.color.tabSelectedColor)
         }
 
-        if(cities.tabCount > 0) {
-//            cities.getTabAt(position)!!.select()
-            cities.addOnTabSelectedListener(this)
-        }
+        cities.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+            override fun onTabReselected(p0: TabLayout.Tab?) {}
+            override fun onTabUnselected(p0: TabLayout.Tab?) {}
+            override fun onTabSelected(p0: TabLayout.Tab?) {
+                pager.currentItem = p0!!.position
+            }
+        })
+
+        pager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener{
+            override fun onPageScrollStateChanged(p0: Int) {}
+            override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
+            override fun onPageSelected(p0: Int) {
+                cities.getTabAt(p0)!!.select()
+            }
+        })
+
     }
 
     private fun initializeAutoCompleteFragment() {
@@ -256,11 +282,17 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         if (mSharedPreferences!!.contains("Citys")) {
             val gson = Gson()
             val json = mSharedPreferences!!.getString("Citys", "")
+<<<<<<< HEAD
 
             Log.d(TAG, json)
             Preferences.CITYS = gson.fromJson(json, object: TypeToken<ArrayList<City>>(){}.type)
 
             val requests = ArrayList<Observable<WeatherModel>>()
+=======
+            Preferences.CITYS = gson.fromJson(json, object: TypeToken<ArrayList<City>>(){}.type)
+            val requests = ArrayList<Observable<WeatherModel>>()
+
+>>>>>>> dev
             for (i in 0 until Preferences.CITYS.size) {
                 requests.add(mWeatherProvider!!.getWeatherObservable(Constants.WEATHER_API_KEY,
                         "${Preferences.CITYS[i].latitude},${Preferences.CITYS[i].longitude}",
@@ -275,7 +307,11 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
             Observable.zip(requests){
                 for (i in 0 until it.size) {
+<<<<<<< HEAD
                     Utils.sWeatherModels[Preferences.CITYS[i].name] = (it[i] as WeatherModel)
+=======
+                    Utils.sWeatherModels[Preferences.CITYS[i + 1].name] = (it[i] as WeatherModel)
+>>>>>>> dev
                 }
             }.subscribe({
                 pager.adapter = WeatherForecastAdapter(supportFragmentManager)
@@ -291,12 +327,23 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         initializeCities()
     }
 
+    override fun onStop() {
+        super.onStop()
+        if (Preferences.CITYS.size > 0) {
+            createSharedPreferences()
+        }
+    }
+
     private fun createSharedPreferences() {
         val gson = Gson()
-        Log.d(TAG, gson.toJson(Preferences.CITYS))
+
+        val buf = Preferences.CITYS[0]
+        Preferences.CITYS.removeAt(0)
         val editor = mSharedPreferences!!.edit()
         editor.putString("Citys", gson.toJson(Preferences.CITYS))
         editor.apply()
+
+        Preferences.CITYS.add(0, buf)
     }
 
     private fun getWeather(call: Call<WeatherModel>, city: String) {

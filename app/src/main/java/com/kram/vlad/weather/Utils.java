@@ -89,8 +89,11 @@ public class Utils {
         WEATHERIMAGES.put("389", R.drawable.lightinning);
         WEATHERIMAGES.put("392", R.drawable.snow);
         WEATHERIMAGES.put("395", R.drawable.snow);
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> dev
     }
 
     /*public static void getIcons() {
