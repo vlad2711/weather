@@ -21,9 +21,6 @@ import com.kram.vlad.weather.Constants
 import com.kram.vlad.weather.R
 import com.kram.vlad.weather.Utils
 import com.kram.vlad.weather.api.IWeatherProvider
-import com.kram.vlad.weather.callbacks.CityChooseCallback
-import com.kram.vlad.weather.callbacks.ForecastDateCallback
-import com.kram.vlad.weather.callbacks.UpdateItemCallback
 import com.kram.vlad.weather.geolocation.GeoLocationCallback
 import com.kram.vlad.weather.geolocation.GeoLocationProvider
 import com.kram.vlad.weather.models.WeatherModel
@@ -53,7 +50,7 @@ import kotlinx.android.synthetic.main.activity_main.*
  * MainActivity of app
  */
 
-class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener, UpdateItemCallback, CityChooseCallback {
+class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener {
 
 
     companion object {
@@ -75,8 +72,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                     Manifest.permission.ACCESS_FINE_LOCATION)
         }
 
-
-        toolbarInit()
         initUserInterface()
         //geolocation(48.510473, 32.251812)
 
@@ -112,9 +107,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                     longitude.toString(),
                     cityName,
                     "current"))
-            if (mAutocompleteFragment != null && cityName != null)
-                mAutocompleteFragment!!.setText(cityName)
-
             initializeCities()
         } catch (e: IOException) {
             e.printStackTrace()
@@ -122,13 +114,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
     }
 
-    override fun updateItemCallback() {
-        initializeCities()
-    }
-
-    override fun cityChooseCallback(city: City, position: Int) {
-        getWeather(createCallFromGeoPosition(mWeatherProvider!!, city.latitude.toString(), city.longitude.toString()), city.name)
-    }
 
     override fun onPlaceSelected(place: Place) {
 
@@ -141,7 +126,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
         initializeCities()
 
-        this.updateItemCallback()
 
         Log.i(TAG, "Place: " + place.name)
     }
@@ -163,12 +147,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
     private fun initGeolocation() {
         mGeoLocationProvider = GeoLocationProvider(this)
-    }
-
-    private fun toolbarInit() {
-        setSupportActionBar(toolbar)
-        supportActionBar!!.setDisplayShowTitleEnabled(false)
-        supportActionBar!!.setDisplayShowHomeEnabled(true)
     }
 
     private fun getOrientation() {
@@ -253,7 +231,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
             Observable.zip(requests){
                 for (i in 0 until it.size) {
-                    Utils.sWeatherModels[Preferences.CITYS[i].name] = (it[i] as WeatherModel)
+                    Utils.sWeatherModels[Preferences.CITYS[i + 1].name] = (it[i] as WeatherModel)
                 }
             }.subscribe({
                 pager.adapter = WeatherForecastAdapter(supportFragmentManager)
