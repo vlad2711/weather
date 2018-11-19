@@ -5,6 +5,7 @@ import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +17,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.google.gson.reflect.TypeToken
 import com.kram.vlad.weather.Constants
 import com.kram.vlad.weather.R
@@ -73,10 +75,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         }
 
         initUserInterface()
-        //geolocation(48.510473, 32.251812)
-
-        initGeolocation()
-
     }
 
     fun handleResponse(weatherModel: WeatherModel?, city: String) {
@@ -89,11 +87,21 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
+
     private fun checkPermissions(vararg permissions: String) {
         ActivityCompat.requestPermissions(this, permissions, Constants.PERMISSION_REQUEST_CODE)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == Constants.PERMISSION_REQUEST_CODE){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                initGeolocation()
+            } else{
+                Toast.makeText(this, "Can't use geolocation to find your position :(", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun geolocation(latitude: Double, longitude: Double) {
         try {
@@ -141,8 +149,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         getCitysFromSharedPreferences()
         getOrientation()
         initializeCities()
-
-       // pager.adapter = WeatherForecastAdapter(supportFragmentManager)
     }
 
     private fun initGeolocation() {
