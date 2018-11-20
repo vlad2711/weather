@@ -35,27 +35,10 @@ interface IWeatherProvider {
                    @Query("lang") lang: String,
                    @Query("tp") tp: String): Call<WeatherModel>
 
-    @GET("/premium/v1/weather.ashx")
-    fun getWeatherObservable(@Query("key") key: String,
-                             @Query("q") q: String,
-                             @Query("num_of_days") numOfDays: String,
-                             @Query("date") date: String,
-                             @Query("format") format: String,
-                             @Query("show_comments") comments: String,
-                             @Query("showlocaltime") localtime: String,
-                             @Query("lang") lang: String,
-                             @Query("tp") tp: String): Observable<WeatherModel>
-
     companion object {
         fun create(): IWeatherProvider {
             return Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(Schedulers.io()))
-<<<<<<< HEAD
-                    //.client(client)
-=======
-                    .client(client)
->>>>>>> dev
                     .baseUrl(Constants.WEATHER_BASE_URL)
                     .build().create(IWeatherProvider::class.java)
         }

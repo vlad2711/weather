@@ -22,12 +22,13 @@ import retrofit2.Response
 
 class WeatherForecastFragment: Fragment() {
     private lateinit var cityName: String
-
+    private var position = 0
     companion object {
-        fun newInstance(city: String): WeatherForecastFragment {
+        fun newInstance(city: String, position: Int): WeatherForecastFragment {
             val fragment = WeatherForecastFragment()
             val bundle = Bundle()
             bundle.putString("city", city)
+            bundle.putInt("position", position)
             fragment.arguments = bundle
             return fragment
         }
@@ -36,6 +37,10 @@ class WeatherForecastFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.weather_forecat_fragment, container, false)
         cityName = arguments!!.getString("city")!!
+        position = arguments!!.getInt("position")
+
+        getForecast(createCallFromGeoPosition(IWeatherProvider.create(), Preferences.CITYS[position].latitude, Preferences.CITYS[position].longitude))
+
         if(Utils.sWeatherModels.containsKey(cityName)) userInterfaceInit(view)
         return view
     }
@@ -47,5 +52,42 @@ class WeatherForecastFragment: Fragment() {
         view.timeline_view.layoutManager = LinearLayoutManager(view.context)
         view.timeline_view.adapter = TimelineAdapter(Utils.sWeatherModels[cityName]!!.data.weather[0])
         view.city_name.text = cityName
+    }
+
+    private fun createCallFromGeoPosition(weatherProvider: IWeatherProvider, latitude: String, longitude: String): Call<WeatherModel> {
+        //progressBar!!.visibility = View.VISIBLE
+
+        return weatherProvider.getWeather(Constants.WEATHER_API_KEY,
+                "$latitude,$longitude",
+                "14",
+                "today",
+                "json",
+                "yes",
+                "yes",
+                "ru",
+                "3")
+    }
+
+    fun handleResponse(weatherModel: WeatherModel?) {
+        if (weatherModel != null) {
+            activity!!.runOnUiThread {
+                Utils.sWeatherModels[cityName] = weatherModel
+                if(view != null) userInterfaceInit(view!!)
+                //progressBar!!.visibility = View.INVISIBLE
+            }
+        }
+    }
+
+    private fun getForecast(call: Call<WeatherModel>){
+        call.enqueue(object : Callback<WeatherModel> {
+
+            override fun onResponse(call: Call<WeatherModel>, response: Response<WeatherModel>) {
+                handleResponse(response.body())
+            }
+
+            override fun onFailure(call: Call<WeatherModel>, t: Throwable) {
+                t.printStackTrace()
+            }
+        })
     }
 }

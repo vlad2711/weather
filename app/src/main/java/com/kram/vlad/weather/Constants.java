@@ -10,5 +10,4 @@ public class Constants {
     public static final String WEATHER_BASE_URL = "https://api.worldweatheronline.com";
     public static final int PERMISSION_REQUEST_CODE = 1;
     public static final String APP_PREFERENCES = "cityNames";
-
 }
