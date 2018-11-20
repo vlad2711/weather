@@ -40,7 +40,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionListener {
 
-
     companion object {
         val TAG = MainActivity::class.java.simpleName
     }
@@ -80,22 +79,19 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
             val addresses = gcd.getFromLocation(latitude, longitude, 1)
             val cityName = addresses[0].locality
 
-            Preferences.CITYS.add(0, City(latitude.toString(),
+            Preferences.CITYS.add(City(latitude.toString(),
                     longitude.toString(),
                     cityName,
                     "current"))
 
-            for (i in 0 until Preferences.CITYS.size) {
-                Log.d(TAG, Preferences.CITYS[i].name)
-            }
             pager.adapter!!.notifyDataSetChanged()
-            getCitysFromSharedPreferences()
 
             initializeCities()
+            getCitysFromSharedPreferences()
+
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
     }
 
 
@@ -107,9 +103,9 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
                 place.name as String,
                 "added"))
 
+        if(pager.adapter != null) pager.adapter!!.notifyDataSetChanged()
         initializeCities()
 
-        if(pager.adapter != null) pager.adapter!!.notifyDataSetChanged()
     }
 
     override fun onError(status: Status) {
@@ -120,7 +116,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         setTypefacesAndIcons()
         initializeAutoCompleteFragment()
         getOrientation()
-        initializeCities()
         pager.adapter = WeatherForecastAdapter(supportFragmentManager)
     }
 
@@ -137,8 +132,6 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     }
 
     private fun initializeCities() {
-
-        Log.d(TAG, Preferences.CITYS.size.toString())
         if(cities.tabCount > 0) cities.removeAllTabs()
 
 
@@ -179,14 +172,9 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
             val json = mSharedPreferences!!.getString("Citys", "")
             val city: ArrayList<City> = gson.fromJson(json, object: TypeToken<ArrayList<City>>(){}.type)
             for (i in 0 until city.size) Preferences.CITYS.add(city[i])
-
-        } else {
-            Preferences.CITYS = ArrayList()
+            pager.adapter!!.notifyDataSetChanged()
+            initializeCities()
         }
-
-        pager.adapter!!.notifyDataSetChanged()
-
-        initializeCities()
     }
 
     override fun onStop() {

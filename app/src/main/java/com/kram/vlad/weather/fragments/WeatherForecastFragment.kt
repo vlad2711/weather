@@ -39,13 +39,15 @@ class WeatherForecastFragment: Fragment() {
         cityName = arguments!!.getString("city")!!
         position = arguments!!.getInt("position")
 
-        getForecast(createCallFromGeoPosition(IWeatherProvider.create(), Preferences.CITYS[position].latitude, Preferences.CITYS[position].longitude))
 
-        if(Utils.sWeatherModels.containsKey(cityName)) userInterfaceInit(view)
+        if(Utils.sWeatherModels.containsKey(cityName)) userInterfaceInit(view) else getForecast(createCallFromGeoPosition(IWeatherProvider.create(), Preferences.CITYS[position].latitude, Preferences.CITYS[position].longitude))
+
         return view
     }
 
     private fun userInterfaceInit(view: View){
+        view.nestedScrollView.visibility = View.VISIBLE
+        view.progressBar.visibility = View.INVISIBLE
         view.weather_icon.setImageResource(Utils.WEATHERIMAGES[Utils.sWeatherModels[cityName]!!.data.current_condition[0].weatherCode]!!)
         view.weather_state.text = Utils.sWeatherModels[cityName]!!.data.current_condition[0].lang_ru[0].value
         view.temperature.text = String.format(resources.getString(R.string.degrees), Utils.sWeatherModels[cityName]!!.data.current_condition[0].temp_C)
@@ -55,8 +57,6 @@ class WeatherForecastFragment: Fragment() {
     }
 
     private fun createCallFromGeoPosition(weatherProvider: IWeatherProvider, latitude: String, longitude: String): Call<WeatherModel> {
-        //progressBar!!.visibility = View.VISIBLE
-
         return weatherProvider.getWeather(Constants.WEATHER_API_KEY,
                 "$latitude,$longitude",
                 "14",
@@ -72,22 +72,24 @@ class WeatherForecastFragment: Fragment() {
         if (weatherModel != null) {
             activity!!.runOnUiThread {
                 Utils.sWeatherModels[cityName] = weatherModel
-                if(view != null) userInterfaceInit(view!!)
-                //progressBar!!.visibility = View.INVISIBLE
+                if(view != null) {
+                    userInterfaceInit(view!!)
+                    view!!.progressBar.visibility = View.INVISIBLE
+                    view!!.nestedScrollView.visibility = View.VISIBLE
+                }
             }
         }
     }
 
     private fun getForecast(call: Call<WeatherModel>){
+        if(view != null) {
+            view!!.progressBar.visibility = View.VISIBLE
+            view!!.nestedScrollView.visibility = View.INVISIBLE
+        }
+
         call.enqueue(object : Callback<WeatherModel> {
-
-            override fun onResponse(call: Call<WeatherModel>, response: Response<WeatherModel>) {
-                handleResponse(response.body())
-            }
-
-            override fun onFailure(call: Call<WeatherModel>, t: Throwable) {
-                t.printStackTrace()
-            }
+            override fun onResponse(call: Call<WeatherModel>, response: Response<WeatherModel>) { handleResponse(response.body()) }
+            override fun onFailure(call: Call<WeatherModel>, t: Throwable) { t.printStackTrace() }
         })
     }
 }

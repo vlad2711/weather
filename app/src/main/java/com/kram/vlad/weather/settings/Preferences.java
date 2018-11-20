@@ -10,12 +10,6 @@ import java.util.ArrayList;
  */
 
 public class Preferences {
-    public static final int PORTRAITSCREENSIZE = 7;
-    public static final String dateFormat = "E, MMM d";
-    public static final String startDateFormat = "yyyy-MM-dd";
-    public static final String HMM = "hmm";
-    public static final String HHMM = "HH:mm";
-
     public static ArrayList<City> CITYS = new ArrayList<>();
 
 }

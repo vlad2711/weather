@@ -13,32 +13,7 @@ import java.util.HashMap;
 public class Utils {
 
     public static HashMap<String, Integer> WEATHERIMAGES = new HashMap<>();
-   // public static HashMap<String, String> WEATHERICONS = new HashMap<>();
     public static HashMap<String, WeatherModel> sWeatherModels = new HashMap<>();
-
-
-    /*public void setTypeface(Context context, String fontName, TextView... textViews) {
-
-        boolean isQontra = false;
-        boolean isIcons = false;
-        if (sQontra == null && Objects.equals(fontName, "qontra")) {
-            sQontra = Typeface.createFromAsset(context.getAssets(), "fonts/Qontra.otf");
-            isQontra = true;
-        }
-
-        if (sWeatherIcon == null && Objects.equals(fontName, "icons")) {
-            sWeatherIcon = Typeface.createFromAsset(context.getAssets(), "fonts/artill_clean_icons.otf");
-            isIcons = true;
-        }
-
-        for (TextView view : textViews) {
-            if (isQontra)
-                view.setTypeface(sQontra);
-
-            if (isIcons)
-                view.setTypeface(sWeatherIcon);
-        }
-    }*/
 
     public static void setWeatherImage() {
         WEATHERIMAGES.put("113", R.drawable.sunny);
@@ -90,34 +65,6 @@ public class Utils {
         WEATHERIMAGES.put("392", R.drawable.snow);
         WEATHERIMAGES.put("395", R.drawable.snow);
     }
-
-    /*public static void getIcons() {
-        WEATHERICONS.put("113", "1");
-        WEATHERICONS.put("116", "A");
-        WEATHERICONS.put("119", "a");
-        WEATHERICONS.put("122", "3");
-        WEATHERICONS.put("143", "z");
-        WEATHERICONS.put("176", "J");
-        WEATHERICONS.put("179", "I");
-        WEATHERICONS.put("183", "V");
-        WEATHERICONS.put("185", "U");
-        WEATHERICONS.put("200", "Q");
-        WEATHERICONS.put("227", ",");
-        WEATHERICONS.put("230", "I");
-        WEATHERICONS.put("248", "…");
-        WEATHERICONS.put("260", "E");
-        WEATHERICONS.put("263", "M");
-        WEATHERICONS.put("266", "M");
-        WEATHERICONS.put("281", "O");
-        WEATHERICONS.put("284", "O");
-        WEATHERICONS.put("293", "M");
-        WEATHERICONS.put("296", "M");
-        WEATHERICONS.put("299", "K");
-        WEATHERICONS.put("302", "K");
-        WEATHERICONS.put("305", "K");
-        WEATHERICONS.put("308", "K");
-        WEATHERICONS.put("311", "O");
-    }*/
 
     public static int getTime(int hmm){
         int time = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + hmm/100;
