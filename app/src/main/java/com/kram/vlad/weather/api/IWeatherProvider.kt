@@ -7,11 +7,9 @@ import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
-import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import com.kram.vlad.weather.Constants
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
+
 
 
 /**

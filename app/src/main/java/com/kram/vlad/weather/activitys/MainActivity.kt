@@ -95,17 +95,18 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     }
 
 
-    override fun onPlaceSelected(place: Place) {
-
-        Preferences.CITYS.add(City(
-                place.latLng.latitude.toString(),
-                place.latLng.longitude.toString(),
-                place.name as String,
-                "added"))
+    fun onPlaceSelected(name: String, latitude: String, longitude: String){
+        Preferences.CITYS.add(City(latitude, longitude, name,"added"))
 
         if(pager.adapter != null) pager.adapter!!.notifyDataSetChanged()
         initializeCities()
+    }
 
+
+    override fun onPlaceSelected(place: Place) {
+        onPlaceSelected(place.latLng.latitude.toString(),
+                place.latLng.longitude.toString(),
+                place.name as String)
     }
 
     override fun onError(status: Status) {
