@@ -53,4 +53,13 @@
         app:layout_constraintStart_toEndOf="@+id/weather_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Sunny"/>
+
+    <TextView
+        android:id="@+id/city_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:visibility="gone"
+        tools:layout_editor_absoluteX="290dp"
+        tools:layout_editor_absoluteY="14dp"/>
 </android.support.constraint.ConstraintLayout>

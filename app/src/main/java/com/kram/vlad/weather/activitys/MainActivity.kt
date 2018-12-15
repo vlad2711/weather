@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         val TAG = MainActivity::class.java.simpleName
     }
 
+    private var geolocatioEnabled: Boolean = false
     private var mSharedPreferences: SharedPreferences? = null
     private var mGeoLocationProvider: GeoLocationProvider? = null
     private var mAutocompleteFragment: PlaceAutocompleteFragment? = null
@@ -51,8 +52,9 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
         initUserInterface()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) checkPermissions(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
 
@@ -68,6 +70,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
             } else{
                 getCitysFromSharedPreferences()
                 Toast.makeText(this, "Can't use geolocation to find your position :(", Toast.LENGTH_SHORT).show()
+                geolocatioEnabled = false
             }
         }
     }
@@ -104,9 +107,9 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
 
     override fun onPlaceSelected(place: Place) {
-        onPlaceSelected(place.latLng.latitude.toString(),
-                place.latLng.longitude.toString(),
-                place.name as String)
+        onPlaceSelected(place.name as String,
+                place.latLng.latitude.toString(),
+                place.latLng.longitude.toString() )
     }
 
     override fun onError(status: Status) {
@@ -173,7 +176,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
             val json = mSharedPreferences!!.getString("Citys", "")
             val city: ArrayList<City> = gson.fromJson(json, object: TypeToken<ArrayList<City>>(){}.type)
             for (i in 0 until city.size) Preferences.CITYS.add(city[i])
-            pager.adapter!!.notifyDataSetChanged()
+              pager.adapter!!.notifyDataSetChanged()
             initializeCities()
         }
     }
@@ -189,11 +192,11 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         val gson = Gson()
 
         val buf = Preferences.CITYS[0]
-        Preferences.CITYS.removeAt(0)
+        if(geolocatioEnabled)Preferences.CITYS.removeAt(0)
         val editor = mSharedPreferences!!.edit()
         editor.putString("Citys", gson.toJson(Preferences.CITYS))
         editor.apply()
 
-        Preferences.CITYS.add(0, buf)
+        if(geolocatioEnabled)Preferences.CITYS.add(0, buf)
     }
 }

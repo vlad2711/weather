@@ -26,7 +26,6 @@ interface IWeatherProvider {
 
                    @Query("q") q: String,
                    @Query("num_of_days") numOfDays: String,
-                   @Query("date") date: String,
                    @Query("format") format: String,
                    @Query("show_comments") comments: String,
                    @Query("showlocaltime") localtime: String,
