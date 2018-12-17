@@ -19,6 +19,8 @@ import kotlinx.android.synthetic.main.weather_forecat_fragment.view.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.*
 
 class WeatherForecastFragment: Fragment() {
     private lateinit var cityName: String
@@ -101,7 +103,10 @@ class WeatherForecastFragment: Fragment() {
     private fun initDates(view: View, weatherModel: WeatherModel){
         for (i in 0 until weatherModel.data.weather.size) {
             val date = view.dates.newTab()
-            date.text = weatherModel.data.weather[i].date
+            val c = Calendar.getInstance()
+            c.time = Date()
+            date.text = SimpleDateFormat("dd MMM", Locale.getDefault()).format(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(weatherModel.data.weather[i].date))
+
             view.dates.addTab(date)
         }
 

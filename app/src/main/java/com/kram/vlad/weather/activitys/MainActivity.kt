@@ -190,6 +190,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
 
     private fun createSharedPreferences() {
         val gson = Gson()
+        mSharedPreferences = getSharedPreferences(Constants.APP_PREFERENCES, Context.MODE_PRIVATE)
 
         val buf = Preferences.CITYS[0]
         if(geolocatioEnabled)Preferences.CITYS.removeAt(0)
