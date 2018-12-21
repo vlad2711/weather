@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), GeoLocationCallback, PlaceSelectionLis
         }
     }
 
-    override fun geolocation(latitude: Double, longitude: Double) {
+    override fun  geolocation(latitude: Double, longitude: Double) {
         try {
 
             val gcd = Geocoder(this, Locale.getDefault())

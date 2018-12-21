@@ -43,24 +43,22 @@ class WeatherForecastFragment: Fragment() {
         position = arguments!!.getInt("position")
 
 
-        Log.d(TAG, cityName)
 
         if(Utils.sWeatherModels.containsKey(cityName)) {
             userInterfaceInit(view)
             initDates(view, Utils.sWeatherModels[cityName]!!)
-        } else getForecast(createCallFromGeoPosition(IWeatherProvider.create(), Preferences.CITYS[position].latitude, Preferences.CITYS[position].longitude))
+        } else {
+            getForecast(createCallFromGeoPosition(IWeatherProvider.create(), Preferences.CITYS[position].latitude, Preferences.CITYS[position].longitude))
+            view.progressBar.visibility = View.VISIBLE
+            view.scroll_view.visibility = View.INVISIBLE
+        }
 
         return view
     }
 
     private fun userInterfaceInit(view: View){
-        view.nestedScrollView.visibility = View.VISIBLE
+        view.scroll_view.visibility = View.VISIBLE
         view.progressBar.visibility = View.INVISIBLE
-
-
-        Log.d(TAG, cityName)
-
-
 
         view.weather_icon.setImageResource(Utils.WEATHERIMAGES[Utils.sWeatherModels[cityName]!!.data.current_condition[0].weatherCode]!!)
         view.weather_state.text = Utils.sWeatherModels[cityName]!!.data.current_condition[0].lang_ru[0].value
@@ -90,7 +88,7 @@ class WeatherForecastFragment: Fragment() {
                     userInterfaceInit(view!!)
                     initDates(weatherModel)
                     view!!.progressBar.visibility = View.INVISIBLE
-                    view!!.nestedScrollView.visibility = View.VISIBLE
+                    view!!.scroll_view.visibility = View.VISIBLE
                 }
             }
         }
@@ -125,10 +123,6 @@ class WeatherForecastFragment: Fragment() {
 
 
     private fun getForecast(call: Call<WeatherModel>){
-        if(view != null) {
-            view!!.progressBar.visibility = View.VISIBLE
-            view!!.nestedScrollView.visibility = View.INVISIBLE
-        }
 
         call.enqueue(object : Callback<WeatherModel> {
             override fun onResponse(call: Call<WeatherModel>, response: Response<WeatherModel>) { handleResponse(response.body()) }
